@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Read(//c/Users/Yerkebulan/YandexDisk/Repository/wpfui/**)",
+      "Read(//c/**)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet build:*)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Yerkebulan\\\\YandexDisk\\\\Repository\\\\RevitBIMFusion\\\\RespectUI\" -Recurse -File -Filter \"*\\(2\\)*\")",
+      "Bash(Where-Object { $_FullName -notmatch \"\\\\obj\\\\\" -and $_FullName -notmatch \"\\\\bin\\\\\" })",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(powershell -Command:*)",
+      "Bash(git worktree:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(test:*)",
+      "Bash(for ver in 2023 2024 2025 2026)",
+      "Bash(do test -f \"C:/Program Files/Autodesk/Revit $ver/Revit.exe\")",
+      "Bash(echo:*)",
+      "Bash(done)"
+    ]
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "agent-sdk-dev@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "csharp-lsp@claude-plugins-official": true,
+    "github@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "caveman@caveman": true
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/JuliusBrussee/caveman.git"
+      }
+    }
+  },
+  "autoUpdatesChannel": "latest",
+  "effortLevel": "xhigh"
+}
