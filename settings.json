@@ -34,7 +34,10 @@
     "skill-creator@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
-    "caveman@caveman": true
+    "caveman@caveman": true,
+    "microsoft-docs@claude-plugins-official": true,
+    "codex@openai-codex": true,
+    "hookify@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
@@ -42,8 +45,21 @@
         "source": "git",
         "url": "https://github.com/JuliusBrussee/caveman.git"
       }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    },
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
     }
   },
   "autoUpdatesChannel": "latest",
+  "language": "russian",
   "effortLevel": "xhigh"
 }
