@@ -59,7 +59,7 @@
       }
     }
   },
-  "autoUpdatesChannel": "latest",
   "language": "russian",
-  "effortLevel": "xhigh"
+  "effortLevel": "high",
+  "autoUpdatesChannel": "latest"
 }
