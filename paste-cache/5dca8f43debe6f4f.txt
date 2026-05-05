@@ -1,0 +1,15 @@
+PS C:\Users\y.zhumabayev> powershell -ExecutionPolicy Bypass -File "C:\Users\y.zhumabayev\AppData\Local\Temp\hermes-gateway-install.ps1"
+New-ScheduledTaskSettingsSet : Не удается найти параметр, соответствующий имени параметра "DisallowStartOnBatteries".
+C:\Users\y.zhumabayev\AppData\Local\Temp\hermes-gateway-install.ps1:16 знак:5
++     -DisallowStartOnBatteries $false `
++     ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [New-ScheduledTaskSettingsSet], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,New-ScheduledTaskSettingsSet
+
+Register-ScheduledTask : Не удается проверить аргумент для параметра "Settings". Аргумент пустой или имеет значение
+NULL. Укажите непустой аргумент, не имеющий значение NULL, после чего повторите выполнение команды.
+C:\Users\y.zhumabayev\AppData\Local\Temp\hermes-gateway-install.ps1:23 знак:15
++     -Settings $settings `
++               ~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Register-ScheduledTask], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationError,Register-ScheduledTask

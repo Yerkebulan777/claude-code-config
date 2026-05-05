@@ -1,0 +1,24 @@
+C:\Users\y.zhumabayev\AppData\Roaming\ghidra\ghidra_12.0.4_PUBLIC\Extensions\GhidrAssist\.claude\settings.local.json (Системе не удается найти указанный путь)
+java.io.FileNotFoundException: C:\Users\y.zhumabayev\AppData\Roaming\ghidra\ghidra_12.0.4_PUBLIC\Extensions\GhidrAssist\.claude\settings.local.json (Системе не удается найти указанный путь)
+    at java.base/java.io.FileOutputStream.open0(Native Method)
+    at java.base/java.io.FileOutputStream.open(FileOutputStream.java:289)
+    at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:230)
+    at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:179)
+    at ghidra.util.extensions.ExtensionUtils.writeZipEntryToFile(ExtensionUtils.java:621)
+    at ghidra.util.extensions.ExtensionUtils.unzipToInstallationFolder(ExtensionUtils.java:588)
+    at ghidra.util.extensions.ExtensionUtils.install(ExtensionUtils.java:103)
+    at ghidra.framework.project.extensions.ExtensionInstaller.lambda$install$0(ExtensionInstaller.java:97)
+    at ghidra.util.task.TaskLauncher$2.run(TaskLauncher.java:115)
+    at ghidra.util.task.Task.monitoredRun(Task.java:134)
+    at ghidra.util.task.TaskRunner.lambda$startTaskThread$0(TaskRunner.java:106)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+---------------------------------------------------
+Build Date: 2026-Mar-03 1410 EST
+Ghidra Version: 12.0.4
+Java Home: C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot
+JVM Version: Eclipse Adoptium 21.0.11
+OS: Windows 11 10.0 amd64
+Workstation: TP-PC52

@@ -21,7 +21,22 @@
       "Bash(for ver in 2023 2024 2025 2026)",
       "Bash(do test -f \"C:/Program Files/Autodesk/Revit $ver/Revit.exe\")",
       "Bash(echo:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Get-CimInstance *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Get-Service *)",
+      "PowerShell(Get-ItemProperty *)",
+      "PowerShell(Get-Item *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(schtasks /Query *)",
+      "PowerShell(schtasks /query *)",
+      "PowerShell(Measure-Object *)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\y.zhumabayev\\\\Yandex.Disk\\\\Repository\\\\AutoBIMFusion\\\\AutoBIMFusion\\\\Infrastructure\\\\Logging\\\\AILog.cs\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\y.zhumabayev\\Yandex.Disk\\Repository\\AutoBIMFusion",
+      "c:\\Users\\y.zhumabayev\\.claude\\projects\\c--Users-y-zhumabayev-Yandex-Disk-Repository-AutoBIMFusion\\memory"
     ]
   },
   "enabledPlugins": {
@@ -30,20 +45,21 @@
     "agent-sdk-dev@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "csharp-lsp@claude-plugins-official": true,
-    "github@claude-plugins-official": false,
+    "github@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "caveman@caveman": true,
     "microsoft-docs@claude-plugins-official": true,
     "codex@openai-codex": true,
-    "hookify@claude-plugins-official": true
+    "hookify@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
       "source": {
-        "source": "git",
-        "url": "https://github.com/JuliusBrussee/caveman.git"
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
       }
     },
     "openai-codex": {
@@ -60,6 +76,6 @@
     }
   },
   "language": "russian",
-  "effortLevel": "high",
-  "autoUpdatesChannel": "latest"
+  "autoUpdatesChannel": "latest",
+  "theme": "dark-daltonized"
 }
