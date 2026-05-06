@@ -53,7 +53,8 @@
     "microsoft-docs@claude-plugins-official": true,
     "codex@openai-codex": true,
     "hookify@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "dotnet@dotnet": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
@@ -72,6 +73,12 @@
       "source": {
         "source": "github",
         "repo": "anthropics/skills"
+      }
+    },
+    "dotnet": {
+      "source": {
+        "source": "github",
+        "repo": "dotnet/skills"
       }
     }
   },

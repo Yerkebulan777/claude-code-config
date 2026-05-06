@@ -30,5 +30,13 @@
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\anthropic-agent-skills",
     "lastUpdated": "2026-04-21T12:04:28.415Z"
+  },
+  "dotnet-agent-skills": {
+    "source": {
+      "source": "github",
+      "repo": "dotnet/skills"
+    },
+    "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\dotnet-agent-skills",
+    "lastUpdated": "2026-05-06T07:23:56.786Z"
   }
 }
