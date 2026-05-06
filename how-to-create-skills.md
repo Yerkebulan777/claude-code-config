@@ -178,6 +178,27 @@ aider --system-prompt "$(cat csharp-standards.md)"
 
 ---
 
+### OpenAI Codex (codex CLI)
+
+1. For global instructions, create `~/.codex/instructions.md` and paste the rules content above.
+2. For project-level instructions, create `AGENTS.md` in the project root — Codex reads it automatically.
+3. Alternatively, pass via CLI flag:
+
+```bash
+codex --system-prompt "$(cat csharp-standards.md)" "your task here"
+```
+
+Or set in `~/.codex/config.toml`:
+
+```toml
+[model]
+system_prompt_file = "~/.codex/instructions.md"
+```
+
+Reference: https://github.com/openai/codex
+
+---
+
 ### Any tool with a system prompt field
 
 If your tool has a "System Prompt", "Custom Instructions", or "AI Rules" field —
@@ -273,4 +294,5 @@ OUTPUT:
 | Opencode | `AGENTS.md` | Yes |
 | Claude Code | `CLAUDE.md` or `~/.claude/CLAUDE.md` | Yes |
 | Aider | `.aider.conf.yml` → `system-prompt` | Yes |
+| OpenAI Codex | `~/.codex/instructions.md` or `AGENTS.md` | Yes |
 | Any other tool | System prompt / Custom instructions field | Manual paste |
