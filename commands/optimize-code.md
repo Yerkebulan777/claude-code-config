@@ -43,8 +43,42 @@ Find code blocks repeated 2+ times:
 - Show exactly: what is duplicated, where, and provide the consolidated version.
 
 ### 4. Shallow Wrappers & Feature Envy
-- **Shallow wrapper**: a class whose interface is nearly as complex as its implementation — it adds no real abstraction. Candidate for removal or merging into the caller.
-- **Feature envy**: a method that uses more data from *another* class than from its own. The logic likely belongs in that other class — propose moving it there.
+
+**Shallow wrapper**: a class whose interface is nearly as complex as its implementation — it adds no real abstraction. Candidate for removal or merging into the caller.
+
+**Feature envy**: a method that uses more data from *another* class than from its own.
+The logic likely belongs in that other class — propose moving it there.
+
+Quick diagnostic: if you remove the foreign object parameter and the method breaks completely
+because it had nothing of its own to work with — it does not belong here.
+
+Example of feature envy (bad):
+```csharp
+public class Invoice
+{
+    // Uses only Order data — belongs in Order, not here
+    public decimal CalculateTotal(Order order)
+    {
+        return order.Price * order.Quantity * (1 - order.Discount);
+    }
+}
+```
+
+After fix — move to where the data lives:
+```csharp
+public class Order
+{
+    public decimal Price { get; set; }
+    public int Quantity { get; set; }
+    public decimal Discount { get; set; }
+
+    public decimal CalculateTotal()
+        => Price * Quantity * (1 - Discount);
+}
+```
+
+In Revit/AutoCAD context: a method in an orchestrator that computes something using only
+fields of `ViewportInfo` — that logic belongs in `ViewportInfo`, not the orchestrator.
 
 ### 5. Primitive Obsession
 - `string`, `int`, `bool` parameters used as identifiers, states, or domain values where a typed enum or value object would eliminate invalid states and make intent explicit.
