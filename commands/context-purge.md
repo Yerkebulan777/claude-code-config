@@ -1,4 +1,4 @@
-# /ctx-purge — Clear Working Context
+# /context-purge — Clear Working Context
 
 Summarize what matters from this session, then reset — so the next task starts clean.
 
