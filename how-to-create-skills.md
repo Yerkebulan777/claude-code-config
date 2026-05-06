@@ -1,347 +1,276 @@
-# How to Create Claude Code Skills and Slash Commands
+# C# Development Standards — Universal AI Agent Setup Guide
 
-A complete guide for replicating the C# development toolkit (`csharp-standards`, `/check-code`, `/optimize-code`)
-on any machine or for any AI agent working with Claude Code.
-
----
-
-## Overview
-
-Claude Code supports two types of global AI instructions:
-
-| Type | Trigger | Storage location |
-|---|---|---|
-| **Skill** | Auto-triggered when description matches the task | `AppData/Roaming/Claude/.../skills/<name>/SKILL.md` |
-| **Slash command** | User types `/<name>` explicitly | `~/.claude/commands/<name>.md` |
+This guide shows how to apply the same C# coding standards to any AI coding agent.
+The rules are tool-agnostic. Only the setup method differs per tool.
 
 ---
 
-## Part 1 — Create a Skill (auto-trigger)
+## The Rules (copy this block into any AI agent)
 
-Skills are loaded automatically when Claude decides the skill description matches the current task.
-They appear in the session with the prefix `anthropic-skills:<name>`.
+Paste the following as a system prompt, custom instruction, or rules file depending on your tool.
 
-### Step 1: Find the skills plugin directory
+---
 
-Run this to find the correct path:
-
-```bash
-find "$APPDATA/Claude/local-agent-mode-sessions/skills-plugin" -type d -name "skills"
-# Result example:
-# /c/Users/<username>/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/<plugin-uuid>/<install-uuid>/skills/
-```
-
-The path contains two UUIDs:
-- First UUID = plugin ID (same for all users with the same plugin)
-- Second UUID = install/workspace ID (unique per machine)
-
-### Step 2: Create the skill directory
-
-```bash
-SKILLS_DIR="/c/Users/<username>/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/<plugin-uuid>/<install-uuid>/skills"
-mkdir -p "$SKILLS_DIR/csharp-standards"
-```
-
-### Step 3: Write SKILL.md
-
-The file **must** have YAML frontmatter with `name` and `description`.
-The `description` is the trigger — write it clearly so Claude knows when to apply the skill automatically.
-
-Save to: `$SKILLS_DIR/csharp-standards/SKILL.md`
+### SYSTEM PROMPT / RULES CONTENT
 
 ```
----
-name: csharp-standards
-description: >
-  C# development expert. Apply this skill automatically whenever you write, edit, or review C# code,
-  work with .cs files, .csproj projects, or the user asks for help with C# classes, methods, services,
-  repositories, or algorithms. This skill defines mandatory code quality standards — apply them proactively
-  without waiting to be asked.
+You are a C# development expert. Always follow these rules when writing or editing C# code.
+
 ---
 
-# C# Development Standards
+RULE 1 — SIMPLICITY & DRY
 
-You are a C# expert. Always follow these rules when writing or editing code.
+- Extract repeated logic into static utility classes.
+- Separate business logic and math from DB, file, and API operations (SRP).
+- Call utility methods directly — never create wrapper classes that add no logic.
+- If 3+ methods look similar, extract a shared helper. 1 similar line is not a reason.
 
-## 1. Simplicity First & DRY
+---
 
-Goal: minimal code, maximum clarity.
+RULE 2 — STABILITY & MEMORY MANAGEMENT
 
-- Extract repeated logic into static utility classes (static class).
-- Follow SRP strictly: keep math and business logic separate from DB, file, and API operations.
-- Call utility methods directly — do not create wrapper classes that add no logic.
-- Three similar methods = signal to extract a shared helper. One similar line = not a reason.
-
-Bad:
-    public class MathWrapper
-    {
-        private readonly Calculator _calc;
-        public double Add(double a, double b) => _calc.Add(a, b); // pointless wrapper
-    }
-
-Good: call Calculator.Add() directly.
-
-## 2. Stability & Memory Management
-
-Top priority — stable operation with no memory leaks.
-
-Always wrap IDisposable objects in using:
+Always wrap IDisposable objects in using blocks. This includes:
   - DB connections: SqlConnection, DbContext, OracleConnection
-  - Transactions: DbTransaction, SqlTransaction, any ITransaction
+  - Transactions: DbTransaction, SqlTransaction, ITransaction
   - Streams: Stream, StreamReader, StreamWriter, BinaryReader, BinaryWriter
   - HTTP: HttpClient, HttpResponseMessage
-  - Any Revit API object implementing IDisposable
+  - Any framework object implementing IDisposable
 
-    // Correct
-    using var connection = new SqlConnection(connectionString);
-    using var transaction = connection.BeginTransaction();
+Example (correct):
+  using var connection = new SqlConnection(connectionString);
+  using var transaction = connection.BeginTransaction();
 
-- Never use async void — always async Task.
-- Prefer IEnumerable<T> over List<T> in method signatures when the collection is read-only.
+Additional:
+  - Never use async void — always use async Task.
+  - Prefer IEnumerable<T> over List<T> in method signatures if the collection is not modified.
 
-## 3. Error Handling
+---
 
-Principle: guard clauses over exceptions.
+RULE 3 — ERROR HANDLING
 
-- Use try/catch ONLY in genuinely dangerous locations: IO, external APIs, network, DB transactions.
-- Always catch specific exception types, never bare Exception:
+- Use try/catch ONLY at genuinely dangerous boundaries: IO, external API, network, DB transactions.
+- Always catch specific exception types. Never use bare catch (Exception).
 
-    catch (SqlException ex) when (ex.Number == 1205) // deadlock
+  Correct:
+    catch (SqlException ex) when (ex.Number == 1205)
     catch (HttpRequestException ex)
 
-- Keep logic inside try blocks minimal.
-- Never wrap pure math or business logic in try/catch.
+- A catch block with no logging or action is a "swallowed exception" — always a bug.
+- Never wrap pure math, sorting, or business logic in try/catch.
+- Guard clauses take priority over try/catch:
 
-Guard clauses first:
-    if (items == null || items.Count == 0) return;
-    ProcessItems(items);
+  if (items == null || items.Count == 0) return;
+  // proceed safely
 
-Avoid redundant null checks for objects guaranteed non-null:
-    // Bad — parameter cannot be null here
-    if (parameter != null) parameter.Execute();
+- Avoid redundant null checks on objects guaranteed non-null by DI or prior guard clauses.
 
-    // Good — validate only at system boundary
-    public void Process(string input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-            throw new ArgumentException("Input required", nameof(input));
-    }
+---
 
-## 4. Logging & Comments
+RULE 4 — LOGGING
 
-Logging inside loops — use StringBuilder only:
-    // Bad
-    foreach (var item in items)
-        logger.Log("Processing: " + item.Name + " id=" + item.Id);
+- Inside loops, use StringBuilder for log accumulation only. Never concatenate strings in a loop.
 
-    // Good
+  Bad:
+    foreach (var x in list) logger.Log("item: " + x.Name);
+
+  Good:
     var sb = new StringBuilder();
-    foreach (var item in items)
-        sb.AppendLine($"Processing: {item.Name} id={item.Id}");
+    foreach (var x in list) sb.AppendLine($"item: {x.Name}");
     logger.Log(sb.ToString());
 
-Comments:
-- Write in Russian, keep them short.
-- Explain WHY (the reason for the decision), not WHAT (already visible from the code).
+---
 
-    // Bad: Sums the list of numbers
-    public double Sum(IEnumerable<double> values) { ... }
+RULE 5 — COMMENTS
 
-    // Good: Revit API returns area in ft2, converting to m2
-    public double ToSquareMeters(double squareFeet) => squareFeet * 0.0929;
+- Comments must be short and written in Russian.
+- Explain WHY the code does something — not WHAT (the code itself shows what).
+- Never write comments that just restate the method name.
 
-## Quick Reference
+  Bad:  // Calculates the sum
+        public double Sum(...) { }
 
-| Rule          | Do                            | Don't                        |
-|---------------|-------------------------------|------------------------------|
-| Resources     | using var x = ...             | Forget Dispose()             |
-| Loop logging  | StringBuilder                 | String concatenation         |
-| Errors        | catch (SqlException ex)       | catch (Exception) everywhere |
-| Null checks   | Validate at system boundary   | Check obviously-non-null     |
-| Utilities     | Call static class directly    | Pointless wrapper classes    |
-```
-
-### Step 4: Verify the skill is loaded
-
-Open a new Claude Code session. In the system skills list you should see:
-
-    anthropic-skills:csharp-standards — C# development expert. Apply this skill automatically...
+  Good: // Revit API returns ft², converting to m²
+        public double ToSquareMeters(double ft2) => ft2 * 0.0929;
 
 ---
 
-## Part 2 — Create Slash Commands
+QUICK REFERENCE
 
-Slash commands are plain markdown files stored in `~/.claude/commands/`.
-The filename becomes the command: `check-code.md` → `/check-code`.
-
-### Directory layout
-
-    ~/.claude/commands/
-    ├── check-code.md       →  /check-code
-    └── optimize-code.md    →  /optimize-code
-
----
-
-### Command 1: /check-code
-
-File: `~/.claude/commands/check-code.md`
-
-```
-# /check-code — C# Code Review
-
-Perform a strict code review of the current or selected C# code against the project's development standards.
-
-## What to check
-
-### 1. Resource Management (IDisposable)
-Find all objects implementing IDisposable:
-- DB connections: SqlConnection, DbContext, OracleConnection
-- Transactions: DbTransaction, SqlTransaction, any ITransaction
-- Streams: Stream, StreamReader, StreamWriter, BinaryReader, BinaryWriter
-- HTTP: HttpClient, HttpResponseMessage
-- Any Revit API object implementing IDisposable
-
-Verify each is wrapped in using. Exception: objects whose lifecycle is intentionally managed externally (DI container).
-
-### 2. Error Handling
-- try/catch must appear only at genuinely dangerous locations: IO, external API, network, DB transactions.
-- catch (Exception) without a type filter is always a violation — catch a specific type.
-- catch block with no logging or handling is a violation ("swallowed exception").
-- Log messages inside try must be concise: operation name + key parameters only.
-
-### 3. Code Cleanliness
-- Wrapper classes that only delegate calls without adding logic — DRY/SRP violation.
-- Redundant null checks: if an object is guaranteed non-null by DI or a prior guard, the check is noise.
-- Duplicate code (3+ similar blocks) must be extracted into a utility method or static class.
-- StringBuilder is required for logging inside loops. String concatenation in a loop is a violation.
-
-### 4. Additional (flag if noticed)
-- async void instead of async Task — violation.
-- Comments that describe what instead of why — remove them.
-- Unused using directives — flag for cleanup.
-
-## Output format
-
-Start with a one-sentence overall assessment of the code quality.
-
-Then list each violation:
-
-[N]. [Category] — [Short description]
-- Location: ClassName.MethodName, line ~N
-- Problem: what exactly is wrong
-- Fix: show the corrected version (brief code snippet)
-
-If no violations found — state this explicitly and confirm the code meets the standards.
-
-End with a summary: total violation count, which are critical (memory leaks, hidden errors)
-vs non-critical (style, readability).
+  IDisposable     → always use "using"
+  Loop + logging  → always use StringBuilder
+  Exceptions      → catch specific types only, never swallow
+  Null checks     → only at system boundaries, not on guaranteed-non-null objects
+  Wrappers        → only if they add logic; otherwise call utilities directly
 ```
 
 ---
 
-### Command 2: /optimize-code
+## How to Apply Per Tool
 
-File: `~/.claude/commands/optimize-code.md`
+### Cursor
+
+1. Create `.cursor/rules` directory in your project root (or use the global rules file).
+2. Create a file: `.cursor/rules/csharp-standards.mdc`
+3. Paste the rules content above.
+4. In Cursor Settings → Rules → add the file path, or use `@rules` in chat.
+
+Alternative: create `.cursorrules` in the project root and paste the rules directly.
+
+Reference: https://docs.cursor.com/context/rules-for-ai
+
+---
+
+### Windsurf (Codeium)
+
+1. Create `.windsurfrules` in the project root.
+2. Paste the rules content above into the file.
+3. Windsurf loads it automatically for every session in that project.
+
+For global rules: Settings → AI → Custom Instructions → paste the content.
+
+Reference: https://docs.windsurf.com/windsurf/customization
+
+---
+
+### GitHub Copilot
+
+1. Create `.github/copilot-instructions.md` in your repository root.
+2. Paste the rules content above.
+3. Copilot reads this file automatically for all suggestions in the repo.
+
+Reference: https://docs.github.com/en/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot
+
+---
+
+### Opencode
+
+1. Create `AGENTS.md` in your project root.
+2. Paste the rules content above.
+3. Opencode reads `AGENTS.md` automatically as agent context.
+
+---
+
+### Claude Code
+
+1. For project-level rules: create `CLAUDE.md` in the project root and paste the rules.
+2. For global rules (all projects): paste into `~/.claude/CLAUDE.md`.
+3. For an auto-triggered skill: create `SKILL.md` in the skills plugin directory
+   (see the Claude-specific section below if needed).
+
+Reference: https://docs.anthropic.com/en/docs/claude-code/memory
+
+---
+
+### Aider
+
+Add to your `.aider.conf.yml`:
+
+```yaml
+system-prompt: |
+  You are a C# development expert.
+  [paste rules content here]
+```
+
+Or pass via CLI:
+```bash
+aider --system-prompt "$(cat csharp-standards.md)"
+```
+
+---
+
+### Any tool with a system prompt field
+
+If your tool has a "System Prompt", "Custom Instructions", or "AI Rules" field —
+paste the rules block directly into that field. The content is plain text and works
+with any LLM regardless of provider (OpenAI, Anthropic, Gemini, etc.).
+
+---
+
+## Slash Commands (code review & optimization)
+
+The following two commands can be used as:
+- Slash commands in Claude Code (`/check-code`, `/optimize-code`)
+- Prompt templates in Cursor (`@check-code`)
+- Saved prompts in any tool that supports them
+
+### /check-code — C# Code Review
 
 ```
-# /optimize-code — C# Codebase Optimizer
+Review the current C# code strictly against these standards:
 
-Refactor and optimize the current or selected C# code.
-Goal: less code, better readability, lower memory usage.
+1. RESOURCE MANAGEMENT
+   Find all IDisposable objects (SqlConnection, DbContext, Stream, HttpClient, transactions, etc.)
+   Verify each is wrapped in a using block.
+   Flag any missing using as a CRITICAL violation (memory leak risk).
 
-## What to analyze
+2. ERROR HANDLING
+   Flag: catch (Exception) without type filter — always a violation.
+   Flag: empty catch blocks with no logging — swallowed exception.
+   Flag: try/catch wrapping pure logic (math, sorting) — unnecessary.
 
-### 1. Algorithm Simplification
-Simplify the main algorithm implementation WITHOUT changing its functionality —
-the output must remain identical, only the implementation changes:
-- Nested loops replaceable with LINQ or a dictionary without behavior loss.
-- Recursion without memoization where iteration produces the same result with a smaller stack.
-- if/else if chains replaceable with a dictionary or switch expression with the same outcome.
-- Single-use intermediate variables that only obscure readability.
+3. CODE CLEANLINESS
+   Flag: wrapper classes that only delegate calls without adding logic.
+   Flag: redundant null checks on objects guaranteed non-null.
+   Flag: 3+ duplicate code blocks that should be extracted to a utility.
+   Flag: string concatenation inside loops — must use StringBuilder.
 
-If a simplification would change behavior (ordering, edge cases, exceptions) —
-do NOT apply it; flag it explicitly instead.
+4. ADDITIONAL
+   Flag: async void instead of async Task.
+   Flag: comments describing WHAT instead of WHY.
 
-### 2. Dead Code Removal
-Find and mark for deletion:
-- private methods with no call sites.
-- Fields and properties that are declared but never read.
-- Commented-out old code (// old version, // TODO: delete).
-- Stale comments describing behavior that no longer exists in the code.
-- Unused using directives.
+OUTPUT FORMAT:
+- One sentence overall assessment.
+- Each violation: [N]. [Category] — [description] | Location | Problem | Fix (code snippet)
+- Final summary: X critical (memory/errors), Y non-critical (style).
+```
 
-### 3. Duplication Elimination
-Find code blocks repeated 2+ times:
-- Identical logic in different methods → extract to a private static helper or static utility class.
-- Repeated guard conditions → generalize.
-- Similar classes with the same structure → consider a generic or base class.
+### /optimize-code — C# Codebase Optimizer
 
-Show exactly what is duplicated, where, and provide the consolidated version.
+```
+Refactor and optimize the current C# code. Goal: less code, better readability, lower memory.
+Do NOT change the observable behavior — inputs and outputs must remain identical.
 
-### 4. Memory & Performance Optimization
-- String concatenation in a loop → StringBuilder.
-- List<T>.Contains() in a loop → HashSet<T>.
-- Value computed multiple times → cache in a local variable.
-- ToList() where IEnumerable<T> is sufficient → remove unnecessary allocation.
-- IDisposable objects without using → add it.
-- Large objects in fields needed only within a single method → move to local variables.
+1. ALGORITHM SIMPLIFICATION (no behavior change allowed)
+   - Replace nested loops with LINQ or Dictionary where behavior is preserved.
+   - Replace if/else if chains with switch expression or Dictionary lookup.
+   - Remove single-use intermediate variables that obscure reading.
+   - If simplification would change edge case behavior — flag it, do not apply.
 
-## Output format
+2. DEAD CODE REMOVAL
+   - Private methods with no callers.
+   - Fields/properties declared but never read.
+   - Commented-out old code blocks.
+   - Stale comments about removed behavior.
+   - Unused using directives.
 
-Start with a brief description in Russian: what exactly you are going to change and why,
-organized by the sections above.
+3. DUPLICATION ELIMINATION
+   - Find blocks repeated 2+ times → extract to private static helper or static utility class.
+   - Show: what is duplicated, where, and the consolidated version.
 
-Then provide the complete optimized code — not a patch or diff, but the full ready-to-use
-file or method. For large files, output only the changed sections with line numbers.
+4. MEMORY & PERFORMANCE
+   - String concat in loop → StringBuilder.
+   - List<T>.Contains() in loop → HashSet<T>.
+   - Repeated computation → cache in local variable.
+   - Unnecessary ToList() → remove, keep IEnumerable<T>.
+   - IDisposable without using → add using.
 
-For each change, briefly explain WHY it improves the code (not what changed, but why it is better).
-
-If a section does not apply to the current code — state this explicitly.
+OUTPUT:
+- Start with a brief description (in Russian) of what will change and why.
+- Provide the complete optimized code — full file or full method, not a diff.
+- For each change: explain WHY it is better (not just what changed).
+- If a section has no issues — say so explicitly.
 ```
 
 ---
 
-## Part 3 — Verification Checklist
+## Summary Table
 
-After creating all files, open a new Claude Code session and verify:
-
-    [ ] anthropic-skills:csharp-standards  appears in the skills list
-    [ ] /check-code     works when typed in chat
-    [ ] /optimize-code  works when typed in chat
-
-Check commands folder:
-
-    ls ~/.claude/commands/
-
-Check skill was created:
-
-    find "$APPDATA/Claude/local-agent-mode-sessions/skills-plugin" -name "SKILL.md"
-
----
-
-## Part 4 — Backup to GitHub
-
-To save commands to a GitHub repo (assuming ~/.claude is a git repository):
-
-    cd ~/.claude
-    git add commands/check-code.md commands/optimize-code.md
-    git commit -m "add C# development commands"
-    git push origin main
-
-Important: settings.local.json must NOT be committed — it may contain API tokens.
-
----
-
-## File Structure Summary
-
-    ~/.claude/
-    └── commands/
-        ├── check-code.md          # /check-code slash command
-        └── optimize-code.md       # /optimize-code slash command
-
-    %APPDATA%\Claude\local-agent-mode-sessions\skills-plugin\
-    └── <plugin-uuid>\
-        └── <install-uuid>\
-            └── skills\
-                └── csharp-standards\
-                    └── SKILL.md   # auto-triggered C# standards skill
+| Tool | Rules file location | Auto-loaded? |
+|---|---|---|
+| Cursor | `.cursor/rules/*.mdc` or `.cursorrules` | Yes |
+| Windsurf | `.windsurfrules` | Yes |
+| GitHub Copilot | `.github/copilot-instructions.md` | Yes |
+| Opencode | `AGENTS.md` | Yes |
+| Claude Code | `CLAUDE.md` or `~/.claude/CLAUDE.md` | Yes |
+| Aider | `.aider.conf.yml` → `system-prompt` | Yes |
+| Any other tool | System prompt / Custom instructions field | Manual paste |
