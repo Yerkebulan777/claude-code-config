@@ -75,6 +75,30 @@
       }
     }
   },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\cs-post-edit.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\on-stop.mjs"
+          }
+        ]
+      }
+    ]
+  },
   "language": "russian",
   "autoUpdatesChannel": "latest",
   "theme": "dark-daltonized"
