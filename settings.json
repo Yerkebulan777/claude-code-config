@@ -39,10 +39,33 @@
       "c:\\Users\\y.zhumabayev\\.claude\\projects\\c--Users-y-zhumabayev-Yandex-Disk-Repository-AutoBIMFusion\\memory"
     ]
   },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\cs-post-edit.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\on-stop.mjs"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "agent-sdk-dev@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "csharp-lsp@claude-plugins-official": true,
     "github@claude-plugins-official": true,
@@ -53,8 +76,7 @@
     "microsoft-docs@claude-plugins-official": true,
     "codex@openai-codex": true,
     "hookify@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true,
-    "dotnet@dotnet": true
+    "claude-code-setup@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
@@ -82,30 +104,7 @@
       }
     }
   },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\cs-post-edit.mjs"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\on-stop.mjs"
-          }
-        ]
-      }
-    ]
-  },
+  "skillListingBudgetFraction": 0.03,
   "language": "russian",
   "autoUpdatesChannel": "latest",
   "theme": "dark-daltonized"
