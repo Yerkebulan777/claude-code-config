@@ -106,6 +106,6 @@
   },
   "skillListingBudgetFraction": 0.03,
   "language": "russian",
-  "autoUpdatesChannel": "latest",
+  "autoUpdatesChannel": "stable",
   "theme": "dark-daltonized"
 }
