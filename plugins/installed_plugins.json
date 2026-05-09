@@ -3,132 +3,145 @@
   "plugins": {
     "superpowers@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\superpowers\\5.1.0",
         "version": "5.1.0",
         "installedAt": "2026-04-21T12:04:45.884Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "b55764852ac78870e65c6565fb585b6cd8b3c5c9"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "b55764852ac78870e65c6565fb585b6cd8b3c5c9",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "context7@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\context7\\92813e0ee12f",
         "version": "92813e0ee12f",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "code-simplifier@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\code-simplifier\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "agent-sdk-dev@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\agent-sdk-dev\\92813e0ee12f",
         "version": "92813e0ee12f",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "code-review@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\code-review\\92813e0ee12f",
         "version": "92813e0ee12f",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "csharp-lsp@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\csharp-lsp\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "github@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\github\\92813e0ee12f",
         "version": "92813e0ee12f",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "skill-creator@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\skill-creator\\92813e0ee12f",
         "version": "92813e0ee12f",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "claude-md-management@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\claude-md-management\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "caveman@caveman": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\caveman\\caveman\\84cc3c14fa1e",
         "version": "84cc3c14fa1e",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "84cc3c14fa1e10182adaced856e003406ccd250d"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "84cc3c14fa1e10182adaced856e003406ccd250d",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "codex@openai-codex": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\openai-codex\\codex\\1.0.4",
         "version": "1.0.4",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "807e03ac9d5aa23bc395fdec8c3767500a86b3cf"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "807e03ac9d5aa23bc395fdec8c3767500a86b3cf",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "hookify@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\hookify\\92813e0ee12f",
         "version": "92813e0ee12f",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "777db5c30b30fd1809cdc0ed26a6b2cec57628dd",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ],
     "claude-code-setup@claude-plugins-official": [
       {
-        "scope": "user",
+        "scope": "project",
         "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\claude-code-setup\\1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-04-27T13:20:30.589Z",
-        "lastUpdated": "2026-05-08T13:00:33.071Z",
-        "gitCommitSha": "92813e0ee12fc364273edc63a5c637d744484754"
+        "lastUpdated": "2026-05-09T08:05:36.491Z",
+        "gitCommitSha": "92813e0ee12fc364273edc63a5c637d744484754",
+        "projectPath": "C:\\Users\\y.zhumabayev"
       }
     ]
   }

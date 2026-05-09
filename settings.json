@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\cs-post-edit.mjs"
+            "command": "node C:/Users/y.zhumabayev/.claude/hooks/cs-post-edit.mjs"
           }
         ]
       }
@@ -57,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node C:\\Users\\y.zhumabayev\\.claude\\hooks\\on-stop.mjs"
+            "command": "node C:/Users/y.zhumabayev/.claude/hooks/on-stop.mjs"
           }
         ]
       }
