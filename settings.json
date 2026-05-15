@@ -49,6 +49,17 @@
             "command": "node C:/Users/y.zhumabayev/.claude/hooks/cs-post-edit.mjs"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/Users/y.zhumabayev/.claude/hooks/gitnexus/gitnexus-hook.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking GitNexus index freshness..."
+          }
+        ]
       }
     ],
     "Stop": [
@@ -58,6 +69,19 @@
           {
             "type": "command",
             "command": "node C:/Users/y.zhumabayev/.claude/hooks/on-stop.mjs"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Grep|Glob|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/Users/y.zhumabayev/.claude/hooks/gitnexus/gitnexus-hook.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Enriching with GitNexus graph context..."
           }
         ]
       }
