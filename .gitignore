@@ -20,3 +20,9 @@ todos/
 plugins/cache/
 plugins/data/
 plugins/repos/
+.caveman-active.*
+tools/*.exe
+tools/*.pdb
+tools/*.dll
+tools/*.tar.gz
+tools/runtimes/

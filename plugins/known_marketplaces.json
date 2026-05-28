@@ -5,7 +5,7 @@
       "repo": "anthropics/claude-plugins-official"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\claude-plugins-official",
-    "lastUpdated": "2026-05-05T10:50:23.066Z"
+    "lastUpdated": "2026-05-28T12:50:50.464Z"
   },
   "caveman": {
     "source": {
@@ -13,7 +13,7 @@
       "repo": "JuliusBrussee/caveman"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\caveman",
-    "lastUpdated": "2026-04-29T06:32:31.934Z"
+    "lastUpdated": "2026-05-20T11:42:30.917Z"
   },
   "openai-codex": {
     "source": {
@@ -21,7 +21,7 @@
       "repo": "openai/codex-plugin-cc"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\openai-codex",
-    "lastUpdated": "2026-04-21T12:03:58.673Z"
+    "lastUpdated": "2026-05-20T11:42:33.680Z"
   },
   "anthropic-agent-skills": {
     "source": {

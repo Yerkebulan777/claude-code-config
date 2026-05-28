@@ -1,0 +1,2409 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>skill-validator</name>
+    </assembly>
+    <members>
+        <member name="T:SkillValidator.Check.AgentProfiler">
+            <summary>
+            Validates .agent.md files against the agent plugin conventions.
+            See: https://code.visualstudio.com/docs/copilot/customization/custom-agents
+            See: https://code.claude.com/docs/en/plugins-reference (Agents section)
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.CheckCommand.RunReferenceScanner(System.String,System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Run the reference scanner on discovered files. Returns true if errors were found.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Check.ExternalDependencyChecker">
+            <summary>
+            Detects structural external dependencies in skills, agents, and plugins.
+            Flags scripts, non-built-in tool references, and MCP servers for human
+            review. URL scanning is handled separately by the reference scanner
+            (the ReferenceScanner service). Findings are advisory —
+            authors should make an intentional decision to keep or remove each flagged
+            dependency.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ExternalDependencyChecker.LoadAllowList(System.String)">
+            <summary>
+            Load an allowlist file. Lines starting with # are comments, blank lines are ignored.
+            Keys are case-insensitive and use the format type:name:detail.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ExternalDependencyChecker.CheckSkill(SkillValidator.Shared.SkillInfo,System.Collections.Generic.IReadOnlySet{System.String})">
+            <summary>
+            Check a skill for structural external dependencies: scripts, tool references.
+            Returns advisory messages for human review. Entries matching the allowlist are skipped.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ExternalDependencyChecker.CheckAgent(SkillValidator.Shared.AgentInfo,System.Collections.Generic.IReadOnlySet{System.String})">
+            <summary>
+            Check an agent for structural external dependencies: tool references, non-built-in tools.
+            Returns advisory messages for human review. Entries matching the allowlist are skipped.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ExternalDependencyChecker.CheckPlugin(SkillValidator.Shared.PluginInfo,System.Collections.Generic.IReadOnlySet{System.String})">
+            <summary>
+            Check a plugin for MCP server declarations.
+            Returns advisory messages for human review. Entries matching the allowlist are skipped.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ExternalDependencyChecker.InvokesScriptRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>INVOKES\\s+[\\w./-]*\\.\\w+</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match a character in the set [Ii].<br/>
+            ○ Match a character in the set [Nn].<br/>
+            ○ Match a character in the set [Vv].<br/>
+            ○ Match a character in the set [Oo].<br/>
+            ○ Match a character in the set [Kk\u212A].<br/>
+            ○ Match a character in the set [Ee].<br/>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a whitespace character greedily at least once.<br/>
+            ○ Match a character in the set [\--/\w] greedily any number of times.<br/>
+            ○ Match '.'.<br/>
+            ○ Match a word character atomically at least once.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ExternalDependencyChecker.ToolReferenceRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>#tool:[\\w/]+</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match the string "#tool:".<br/>
+            ○ Match a character in the set [/\w] atomically at least once.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="T:SkillValidator.Check.PluginProfiler">
+            <summary>
+            Validates plugin.json files against the agent plugin conventions.
+            See: https://code.visualstudio.com/docs/copilot/customization/agent-plugins
+            See: https://code.claude.com/docs/en/plugins-reference (Plugin manifest schema)
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Check.ReferenceScanner">
+            <summary>
+            Scans skill, agent, and plugin markdown/HTML files for external references
+            and potentially dangerous patterns.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.LoadKnownDomains(System.String)">
+            <summary>
+            Load a known-domains file. Lines starting with # are comments, blank lines are ignored.
+            Entries may be bare domains (e.g. "microsoft.com") or path-scoped
+            (e.g. "github.com/dotnet/runtime").
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.ScanFile(System.String,System.Collections.Generic.IReadOnlyList{System.String},System.String)">
+            <summary>
+            Scan a single file for reference issues. Returns findings (errors).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.DiscoverFiles(System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Discover scannable files under the given directories. Finds SKILL.md,
+            *.agent.md, and references/*.md files recursively.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.ScanFiles(System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{System.String},System.String)">
+            <summary>
+            Scan all provided files and return aggregated findings.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.UrlRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>https?://[^\\s\\)\\]"'&lt;&gt;;]+</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match a character in the set [Hh].<br/>
+            ○ Match a character in the set [Tt] exactly 2 times.<br/>
+            ○ Match a character in the set [Pp].<br/>
+            ○ Match a character in the set [Ss] atomically, optionally.<br/>
+            ○ Match the string "://".<br/>
+            ○ Match a character in the set [^"');&lt;&gt;]\s] atomically at least once.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.PipeToShellRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>curl\\s[^|]*\\|\\s*(ba)?sh\\b|wget\\s[^|]*\\|\\s*(ba)?sh\\b</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match with 2 alternative expressions, atomically.<br/>
+                ○ Match a sequence of expressions.<br/>
+                    ○ Match a character in the set [Cc].<br/>
+                    ○ Match a character in the set [Uu].<br/>
+                    ○ Match a character in the set [Rr].<br/>
+                    ○ Match a character in the set [Ll].<br/>
+                    ○ Match a whitespace character.<br/>
+                    ○ Match a character other than '|' atomically any number of times.<br/>
+                    ○ Match '|'.<br/>
+                    ○ Match a whitespace character greedily any number of times.<br/>
+                    ○ Optional (greedy).<br/>
+                        ○ 1st capture group.<br/>
+                            ○ Match a character in the set [Bb].<br/>
+                            ○ Match a character in the set [Aa].<br/>
+                    ○ Match a character in the set [Ss].<br/>
+                    ○ Match a character in the set [Hh].<br/>
+                    ○ Match if at a word boundary.<br/>
+                ○ Match a sequence of expressions.<br/>
+                    ○ Match a character in the set [Ww].<br/>
+                    ○ Match a character in the set [Gg].<br/>
+                    ○ Match a character in the set [Ee].<br/>
+                    ○ Match a character in the set [Tt].<br/>
+                    ○ Match a whitespace character.<br/>
+                    ○ Match a character other than '|' atomically any number of times.<br/>
+                    ○ Match '|'.<br/>
+                    ○ Match a whitespace character greedily any number of times.<br/>
+                    ○ Optional (greedy).<br/>
+                        ○ 2nd capture group.<br/>
+                            ○ Match a character in the set [Bb].<br/>
+                            ○ Match a character in the set [Aa].<br/>
+                    ○ Match a character in the set [Ss].<br/>
+                    ○ Match a character in the set [Hh].<br/>
+                    ○ Match if at a word boundary.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.SriIntegrityRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>(?i)integrity\\s*=</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match a character in the set [Ii].<br/>
+            ○ Match a character in the set [Nn].<br/>
+            ○ Match a character in the set [Tt].<br/>
+            ○ Match a character in the set [Ee].<br/>
+            ○ Match a character in the set [Gg].<br/>
+            ○ Match a character in the set [Rr].<br/>
+            ○ Match a character in the set [Ii].<br/>
+            ○ Match a character in the set [Tt].<br/>
+            ○ Match a character in the set [Yy].<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match '='.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.ExternalSrcRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>(?i)src\\s*=\\s*["']https?://</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Rr].<br/>
+            ○ Match a character in the set [Cc].<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match '='.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match a character in the set ["'].<br/>
+            ○ Match a character in the set [Hh].<br/>
+            ○ Match a character in the set [Tt] exactly 2 times.<br/>
+            ○ Match a character in the set [Pp].<br/>
+            ○ Match a character in the set [Ss] atomically, optionally.<br/>
+            ○ Match the string "://".<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.ScriptTagMultiLineRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>(?is)&lt;script\\s[^&gt;]*src\\s*=\\s*["'][^"']*["'][^&gt;]*&gt;</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match '&lt;'.<br/>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Cc].<br/>
+            ○ Match a character in the set [Rr].<br/>
+            ○ Match a character in the set [Ii].<br/>
+            ○ Match a character in the set [Pp].<br/>
+            ○ Match a character in the set [Tt].<br/>
+            ○ Match a whitespace character.<br/>
+            ○ Match a character other than '&gt;' greedily any number of times.<br/>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Rr].<br/>
+            ○ Match a character in the set [Cc].<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match '='.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match a character in the set ["'].<br/>
+            ○ Match a character in the set [^"'] atomically any number of times.<br/>
+            ○ Match a character in the set ["'].<br/>
+            ○ Match a character other than '&gt;' atomically any number of times.<br/>
+            ○ Match '&gt;'.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.ScriptSrcExtractRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>(?i)src\\s*=\\s*["']([^"']+)["']</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Rr].<br/>
+            ○ Match a character in the set [Cc].<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match '='.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match a character in the set ["'].<br/>
+            ○ 1st capture group.<br/>
+                ○ Match a character in the set [^"'] atomically at least once.<br/>
+            ○ Match a character in the set ["'].<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.PlaceholderHostRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>(?i)(\\{[^}]+\\}|your[-_]?\\w*name\\w*|your[-_]\\w+|example\\.(com|org|net)|contoso\\.com)</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ 1st capture group.<br/>
+                ○ Match with 4 alternative expressions, atomically.<br/>
+                    ○ Match a sequence of expressions.<br/>
+                        ○ Match '{'.<br/>
+                        ○ Match a character other than '}' atomically at least once.<br/>
+                        ○ Match '}'.<br/>
+                    ○ Match a sequence of expressions.<br/>
+                        ○ Match a character in the set [Yy].<br/>
+                        ○ Match a character in the set [Oo].<br/>
+                        ○ Match a character in the set [Uu].<br/>
+                        ○ Match a character in the set [Rr].<br/>
+                        ○ Match with 2 alternative expressions, atomically.<br/>
+                            ○ Match a sequence of expressions.<br/>
+                                ○ Match a character in the set [\-_] greedily, optionally.<br/>
+                                ○ Match a word character greedily any number of times.<br/>
+                                ○ Match a character in the set [Nn].<br/>
+                                ○ Match a character in the set [Aa].<br/>
+                                ○ Match a character in the set [Mm].<br/>
+                                ○ Match a character in the set [Ee].<br/>
+                                ○ Match a word character atomically any number of times.<br/>
+                            ○ Match a sequence of expressions.<br/>
+                                ○ Match a character in the set [\-_].<br/>
+                                ○ Match a word character atomically at least once.<br/>
+                    ○ Match a sequence of expressions.<br/>
+                        ○ Match a character in the set [Ee].<br/>
+                        ○ Match a character in the set [Xx].<br/>
+                        ○ Match a character in the set [Aa].<br/>
+                        ○ Match a character in the set [Mm].<br/>
+                        ○ Match a character in the set [Pp].<br/>
+                        ○ Match a character in the set [Ll].<br/>
+                        ○ Match a character in the set [Ee].<br/>
+                        ○ Match '.'.<br/>
+                        ○ 2nd capture group.<br/>
+                            ○ Match with 3 alternative expressions, atomically.<br/>
+                                ○ Match a sequence of expressions.<br/>
+                                    ○ Match a character in the set [Cc].<br/>
+                                    ○ Match a character in the set [Oo].<br/>
+                                    ○ Match a character in the set [Mm].<br/>
+                                ○ Match a sequence of expressions.<br/>
+                                    ○ Match a character in the set [Oo].<br/>
+                                    ○ Match a character in the set [Rr].<br/>
+                                    ○ Match a character in the set [Gg].<br/>
+                                ○ Match a sequence of expressions.<br/>
+                                    ○ Match a character in the set [Nn].<br/>
+                                    ○ Match a character in the set [Ee].<br/>
+                                    ○ Match a character in the set [Tt].<br/>
+                    ○ Match a sequence of expressions.<br/>
+                        ○ Match a character in the set [Cc].<br/>
+                        ○ Match a character in the set [Oo].<br/>
+                        ○ Match a character in the set [Nn].<br/>
+                        ○ Match a character in the set [Tt].<br/>
+                        ○ Match a character in the set [Oo].<br/>
+                        ○ Match a character in the set [Ss].<br/>
+                        ○ Match a character in the set [Oo].<br/>
+                        ○ Match '.'.<br/>
+                        ○ Match a character in the set [Cc].<br/>
+                        ○ Match a character in the set [Oo].<br/>
+                        ○ Match a character in the set [Mm].<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.FenceOpenRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^\\s{0,3}(`{3,}|~{3,})</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a whitespace character atomically at most 3 times.<br/>
+            ○ 1st capture group.<br/>
+                ○ Match with 2 alternative expressions, atomically.<br/>
+                    ○ Match '`' atomically at least 3 times.<br/>
+                    ○ Match '~' atomically at least 3 times.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.FenceCloseRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^\\s{0,3}[`~]+\\s*$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a whitespace character atomically at most 3 times.<br/>
+            ○ Match a character in the set [`~] atomically at least once.<br/>
+            ○ Match a whitespace character greedily any number of times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.LocalhostRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^https?://localhost([:/]|$)</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match the string "http".<br/>
+            ○ Match 's' atomically, optionally.<br/>
+            ○ Match the string "://localhost".<br/>
+            ○ 1st capture group.<br/>
+                ○ Match with 2 alternative expressions, atomically.<br/>
+                    ○ Match a character in the set [/:].<br/>
+                    ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.LoopbackRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^https?://127\\.0\\.0\\.1([:/]|$)</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match the string "http".<br/>
+            ○ Match 's' atomically, optionally.<br/>
+            ○ Match the string "://127.0.0.1".<br/>
+            ○ 1st capture group.<br/>
+                ○ Match with 2 alternative expressions, atomically.<br/>
+                    ○ Match a character in the set [/:].<br/>
+                    ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.ReferenceScanner.WildcardListenRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^https?://[+*]([:/]|$)</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match the string "http".<br/>
+            ○ Match 's' atomically, optionally.<br/>
+            ○ Match the string "://".<br/>
+            ○ Match a character in the set [*+].<br/>
+            ○ 1st capture group.<br/>
+                ○ Match with 2 alternative expressions, atomically.<br/>
+                    ○ Match a character in the set [/:].<br/>
+                    ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.ValidateNameFormat(System.String,System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            Validate a name against the agentskills.io spec naming rules.
+            https://agentskills.io/specification#name-field
+            All constraints use "Must" in the spec, so violations are errors.
+            </summary>
+            <param name="name">The name value from frontmatter or plugin.json.</param>
+            <param name="kind">Label for messages, e.g. "Skill", "Agent", "Plugin".</param>
+            <param name="errors">List to append errors to.</param>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.ValidateDescription(System.String,System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            Validates that a description is non-empty and within the length limit.
+            </summary>
+            <param name="description">The description text.</param>
+            <param name="kind">Label for messages, e.g. "Skill", "Agent", "Plugin".</param>
+            <param name="errors">List to append errors to.</param>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.ValidateName(System.String,System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            Validate name format and directory match for skills.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.SectionRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^#{1,4}\\s+</code><br/>
+            Options:<br/>
+            <code>RegexOptions.Multiline</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of a line.<br/>
+            ○ Match '#' atomically at least 1 and at most 4 times.<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.CodeBlockRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>```</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match the string "```".<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.NumberedStepRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^\\d+\\.\\s</code><br/>
+            Options:<br/>
+            <code>RegexOptions.Multiline</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of a line.<br/>
+            ○ Match a Unicode digit atomically at least once.<br/>
+            ○ Match '.'.<br/>
+            ○ Match a whitespace character.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.BulletRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^[-*]\\s</code><br/>
+            Options:<br/>
+            <code>RegexOptions.Multiline</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of a line.<br/>
+            ○ Match a character in the set [*\-].<br/>
+            ○ Match a whitespace character.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.WhenToUseRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^#{1,4}\\s+when\\s+to\\s+use</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase | RegexOptions.Multiline</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of a line.<br/>
+            ○ Match '#' atomically at least 1 and at most 4 times.<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Ww].<br/>
+            ○ Match a character in the set [Hh].<br/>
+            ○ Match a character in the set [Ee].<br/>
+            ○ Match a character in the set [Nn].<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Tt].<br/>
+            ○ Match a character in the set [Oo].<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Uu].<br/>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Ee].<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.WhenNotToUseRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^#{1,4}\\s+when\\s+not\\s+to\\s+use</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase | RegexOptions.Multiline</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of a line.<br/>
+            ○ Match '#' atomically at least 1 and at most 4 times.<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Ww].<br/>
+            ○ Match a character in the set [Hh].<br/>
+            ○ Match a character in the set [Ee].<br/>
+            ○ Match a character in the set [Nn].<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Nn].<br/>
+            ○ Match a character in the set [Oo].<br/>
+            ○ Match a character in the set [Tt].<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Tt].<br/>
+            ○ Match a character in the set [Oo].<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Uu].<br/>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Ee].<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.NameFormatRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^[a-z0-9-]+$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a character in the set [\-0-9a-z] atomically at least once.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Check.SkillProfiler.FileRefRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>\\]\\(([^)]+)\\)</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match the string "](".<br/>
+            ○ 1st capture group.<br/>
+                ○ Match a character other than ')' atomically at least once.<br/>
+            ○ Match ')'.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.CaptureGitHubToken">
+            <summary>
+            Capture GITHUB_TOKEN once at startup so multiple clients can share it
+            and the env var is cleared from child processes.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.GetPluginClient(System.String,System.Boolean)">
+            <summary>
+            Returns a shared CopilotClient, keyed by plugin root for future
+            per-plugin configuration. Currently all clients share the same
+            options because --plugin-dir is NOT honored by the SDK; plugin
+            skills are loaded via SkillDirectories in BuildSessionConfig.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.GetSharedClient(System.Boolean)">
+            <summary>
+            Backward-compatible alias — returns the no-plugin client.
+            Used by judge sessions that don't need plugin loading.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.StopAllClients">
+            <summary>Stop all plugin clients (including the no-plugin client).</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.CleanupWorkDirs(System.Boolean)">
+            <summary>Remove all temporary working directories created during runs.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.ExtractPathFromToolArgs(GitHub.Copilot.SDK.PreToolUseHookInput)">
+            <summary>
+            Extracts a file path from PreToolUseHookInput.ToolArgs for permission sandboxing.
+            Checks common arg keys: path, fileName, fullCommandText.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.BuildCustomAgentConfig(SkillValidator.Shared.AgentInfo)">
+            <summary>
+            Builds a CustomAgentConfig from an AgentInfo, stripping frontmatter from the prompt body.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.ResolvePluginSkillDirectories(System.String)">
+            <summary>
+            Resolves the skill directories for a plugin by reading its plugin.json
+            and returning the resolved skills path. The SDK scans this directory
+            for subdirectories containing SKILL.md files.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.ResolveSourcePath(System.String,System.String,System.String)">
+            <summary>
+            Resolves a setup file source path relative to the eval directory (preferred) or skill directory.
+            Returns the resolved absolute path, or null if resolution fails (no base directory, or path traversal detected).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.AgentRunner.CopyDirectory(System.String,System.String)">
+            <summary>
+            Recursively copies a directory tree, skipping symlinks and reparse
+            points so that staging cannot pull in content from outside the
+            source root.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Comparator.ComputeNormalizedGain(System.Collections.Generic.IReadOnlyList{SkillValidator.Evaluate.ScenarioComparison})">
+            <summary>
+            Normalized gain: g = (post - pre) / (1 - pre)
+            Per Hake (1998), used in SkillsBench to control for ceiling effects.
+            </summary>
+        </member>
+        <member name="F:SkillValidator.Evaluate.EvalSchema.DefaultScenarioTimeoutSeconds">
+            <summary>Default scenario timeout in seconds when not specified in eval.yaml.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.EvaluateTarget(SkillValidator.Evaluate.EvalTargetInfo,SkillValidator.Evaluate.ValidatorConfig,System.Boolean,SkillValidator.Shared.Spinner,System.Collections.Generic.IReadOnlyList{SkillValidator.Evaluate.EvalSkillInfo},System.String,SkillValidator.Evaluate.SessionDatabase,System.Threading.CancellationToken)">
+            <summary>
+            Evaluates an EvalTargetInfo (skill or agent) by dispatching to the appropriate path.
+            For skills, wraps into EvalSkillInfo and calls EvaluateSkill.
+            For agents, handles similar three-way comparison with agent selection.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.EvaluateAgent(SkillValidator.Evaluate.EvalTargetInfo,SkillValidator.Evaluate.ValidatorConfig,System.Boolean,SkillValidator.Shared.Spinner,System.String,SkillValidator.Evaluate.SessionDatabase,System.Threading.CancellationToken)">
+            <summary>
+            Evaluates a custom agent using the same three-way comparison pattern as skills:
+            baseline (no agent), agent-isolated (agent selected), agent-plugin (full plugin + agent selected).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ExecuteAgentScenario(SkillValidator.Evaluate.EvalScenario,SkillValidator.Evaluate.EvalTargetInfo,SkillValidator.Evaluate.ValidatorConfig,System.Boolean,System.Boolean,SkillValidator.Shared.Spinner,System.String,SkillValidator.Evaluate.SessionDatabase,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Execute a single scenario for an agent evaluation (three-way: baseline, agent-isolated, agent-plugin).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ExecuteAgentRun(System.Int32,SkillValidator.Evaluate.EvalScenario,SkillValidator.Evaluate.EvalTargetInfo,SkillValidator.Evaluate.ValidatorConfig,System.Boolean,System.Boolean,SkillValidator.Shared.Spinner,System.String,SkillValidator.Evaluate.SessionDatabase,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Execute a single run of baseline + agent-isolated + agent-plugin for one scenario.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.SanitizeErrorMessage(System.String)">
+            <summary>
+            Collapses multiline error messages to single-line and truncates to a reasonable length
+            so they don't bloat console/markdown reports.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.CreateFailedScenarioComparison(System.String,System.String)">
+            <summary>
+            Creates a degraded ScenarioComparison for a scenario that failed with an exception.
+            This allows the evaluation to continue with other scenarios instead of aborting.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.LoadAndParseEvalData(System.Collections.Generic.IReadOnlyList{SkillValidator.Shared.SkillInfo},System.String)">
+            <summary>
+            Discover eval data (paths, MCP servers) and parse eval configs.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.FindPluginMcpServers(System.String,System.Int32)">
+            <summary>
+            Walk up from a skill directory to find the nearest plugin.json and
+            extract its mcpServers map (if any).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ResolveEvalPath(System.String,System.String)">
+            <summary>
+            Resolve the eval.yaml path for a skill. Tries flat layout first,
+            then searches one level of subdirectories under testsDir.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ValidateEvalPrompts(SkillValidator.Shared.SkillInfo,SkillValidator.Evaluate.EvalConfig)">
+            <summary>
+            Eval-specific static check: reject prompts that mention the skill name,
+            because that biases baseline runs (agent wastes time searching) and forces
+            activation instead of testing organic discovery.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ValidateEvalPrompts(System.String,SkillValidator.Evaluate.EvalConfig)">
+            <summary>
+            Generalized prompt validation: rejects prompts mentioning the target name (skill or agent).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ResolveAgentEvalPath(System.String,System.String)">
+            <summary>
+            Resolve the eval.yaml path for an agent. Tries "agent." prefix convention first,
+            then falls back to plain name. Searches flat and nested layouts.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ResolveAdditionalSkills(System.Collections.Generic.IReadOnlyList{System.String},System.String)">
+            <summary>
+            Resolve declared additional_required_skills from the same plugin.
+            These are author-declared names in eval.yaml that must map to skills in the plugin.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvaluateCommand.ResolveAdditionalAgents(System.Collections.Generic.IReadOnlyList{System.String},System.String)">
+            <summary>
+            Resolve declared additional_required_agents from the same plugin.
+            These are author-declared names in eval.yaml that must map to agents in the plugin.
+            </summary>
+        </member>
+        <member name="F:SkillValidator.Evaluate.Judge.MaxTimelineEvents">
+            <summary>Maximum number of timeline events sent to the judge to avoid prompt explosion on large scenarios.</summary>
+        </member>
+        <member name="F:SkillValidator.Evaluate.Judge.MaxTimelineChars">
+            <summary>Maximum total characters for the formatted timeline string.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Judge.ParseJudgeResponse(System.String,System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>Exported for testing only.</summary>
+        </member>
+        <member name="T:SkillValidator.Evaluate.LlmSession">
+            <summary>
+            Shared helper for single-turn LLM calls used by judges and analyzers.
+            Encapsulates session creation, event handling, timeout, and token tracking.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.LlmSession.SendAsync(System.String,System.String,System.String,System.String,System.Int32,System.Boolean,System.String,GitHub.Copilot.SDK.PermissionRequestHandler,System.Threading.CancellationToken)">
+            <summary>
+            Create a session, send a single prompt, and return the response.
+            </summary>
+            <param name="model">Model identifier.</param>
+            <param name="systemPrompt">System prompt content.</param>
+            <param name="userPrompt">User prompt to send.</param>
+            <param name="workDir">Working directory for the session.</param>
+            <param name="timeoutMs">Per-attempt timeout in milliseconds.</param>
+            <param name="verbose">Whether to pass verbose flag to the client.</param>
+            <param name="timeoutLabel">Label for timeout log messages (e.g. "Judge", "Pairwise judge").</param>
+            <param name="onPermissionRequest">Permission handler; defaults to deny-all if null.</param>
+            <param name="cancellationToken">Cancellation token (linked with timeout internally).</param>
+        </member>
+        <member name="T:SkillValidator.Evaluate.LocalSessionFsHandler">
+            <summary>
+            A local-filesystem implementation of <see cref="T:GitHub.Copilot.SDK.SessionFsProvider"/> that
+            maps SDK session-state I/O requests to physical files under a given root
+            directory.  Required since Copilot SDK no longer ships a built-in
+            default; without this handler, <c>events.jsonl</c> files are never written.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.LocalSessionFsHandler.ResolvePath(System.String)">
+            <summary>Resolve an SDK-provided path to an absolute local path, guarding against traversal.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.MetricsCollector.ExtractSubagentActivation(System.Collections.Generic.IReadOnlyList{SkillValidator.Evaluate.AgentEvent})">
+            <summary>
+            Analyse events from a "with-skill" run to detect which custom subagents
+            (plugin-defined agents) were invoked. Counts any event whose type contains
+            "subagent" (Started, Completed, Failed, Selected, Deselected) and extracts
+            unique agent names from the event data.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.MetricsCollector.ExtractSkillActivation(System.Collections.Generic.IReadOnlyList{SkillValidator.Evaluate.AgentEvent},System.Collections.Generic.Dictionary{System.String,System.Int32},System.String)">
+            <summary>
+            Analyse events from a "with-skill" run to determine whether the skill was activated.
+            When <paramref name="targetSkillName"/> is set, only counts as "Activated" if the
+            target skill was specifically detected — prevents false positives in plugin runs
+            where sibling skills may fire instead of the skill under test.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Evaluate.EvalSkillInfo">
+            <summary>
+            Extends SkillInfo with evaluation-specific data (eval.yaml config, MCP servers).
+            Used only by the eval command and its supporting services.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.EvalSkillInfo.#ctor(SkillValidator.Shared.SkillInfo,System.String,SkillValidator.Evaluate.EvalConfig,System.Collections.Generic.IReadOnlyDictionary{System.String,SkillValidator.Shared.MCPServerDef})">
+            <summary>
+            Extends SkillInfo with evaluation-specific data (eval.yaml config, MCP servers).
+            Used only by the eval command and its supporting services.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Evaluate.EvalTargetKind">
+            <summary>
+            Unified eval target — either a skill or an agent.
+            Most of the evaluation pipeline operates on this generically.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Evaluate.TokenUsage">
+            <summary>Lightweight token counter returned by judge helpers.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.TokenUsage.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Lightweight token counter returned by judge helpers.</summary>
+        </member>
+        <member name="P:SkillValidator.Evaluate.ScenarioComparison.HighVariance">
+            <summary>True when the coefficient of variation across runs exceeds the high-variance threshold.</summary>
+        </member>
+        <member name="P:SkillValidator.Evaluate.ScenarioComparison.VarianceCV">
+            <summary>Coefficient of variation across per-run scores. Null when fewer than 2 runs.</summary>
+        </member>
+        <member name="P:SkillValidator.Evaluate.ScenarioComparison.TimeoutSeconds">
+            <summary>The scenario timeout in seconds, if known (e.g., from eval.yaml or persisted session data).</summary>
+        </member>
+        <member name="P:SkillValidator.Evaluate.ScenarioComparison.ExpectActivation">
+            <summary>When false, non-activation is expected (negative test) and should not flag the verdict.</summary>
+        </member>
+        <member name="P:SkillValidator.Evaluate.ScenarioComparison.FailedRunCount">
+            <summary>Number of individual runs that failed with exceptions and were excluded from aggregation.</summary>
+        </member>
+        <member name="P:SkillValidator.Evaluate.ScenarioComparison.ExecutionError">
+            <summary>Non-null when the entire scenario failed with an execution error (not a timeout).</summary>
+        </member>
+        <member name="P:SkillValidator.Evaluate.SkillVerdict.FailureKind">
+            <summary>Categorizes why the verdict failed, if it did.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.OverfittingJudge.DetectPromptOverfitting(SkillValidator.Evaluate.EvalSkillInfo)">
+            <summary>
+            Deterministic pre-check: scans scenario prompts for explicit skill references
+            that bias the evaluation. These patterns are unambiguously overfitted — they
+            give the skilled agent a direct advantage by name-dropping the skill.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.OverfittingJudge.UseSkillPattern">
+            <remarks>
+            Pattern:<br/>
+            <code>\\buse\\s+(?:the\\s+)?[\\w-]+\\s+skill\\b</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at a word boundary.<br/>
+            ○ Match a character in the set [Uu].<br/>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Ee].<br/>
+            ○ Match a whitespace character greedily at least once.<br/>
+            ○ Optional (greedy).<br/>
+                ○ Match a character in the set [Tt].<br/>
+                ○ Match a character in the set [Hh].<br/>
+                ○ Match a character in the set [Ee].<br/>
+                ○ Match a whitespace character greedily at least once.<br/>
+            ○ Match a character in the set [\-\w] greedily at least once.<br/>
+            ○ Match a whitespace character atomically at least once.<br/>
+            ○ Match a character in the set [Ss].<br/>
+            ○ Match a character in the set [Kk\u212A].<br/>
+            ○ Match a character in the set [Ii].<br/>
+            ○ Match a character in the set [Ll] exactly 2 times.<br/>
+            ○ Match if at a word boundary.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Evaluate.PairwiseJudge.Judge(SkillValidator.Evaluate.EvalScenario,SkillValidator.Evaluate.RunMetrics,SkillValidator.Evaluate.RunMetrics,SkillValidator.Evaluate.PairwiseJudgeOptions,System.Action{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Run a pairwise comparison with position-swap bias mitigation.
+            Calls the judge twice (A-then-B and B-then-A) and checks consistency.
+            </summary>
+        </member>
+        <member name="F:SkillValidator.Evaluate.PairwiseJudge.MaxTimelineEvents">
+            <summary>Maximum number of timeline events to include in pairwise prompts.</summary>
+        </member>
+        <member name="F:SkillValidator.Evaluate.PairwiseJudge.MaxTimelineChars">
+            <summary>Maximum total characters for each formatted timeline.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.PairwiseJudge.ParsePairwiseResponse(System.String,System.Collections.Generic.IReadOnlyList{System.String},System.String)">
+            <summary>Exported for testing only.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.PairwiseJudge.PairwiseToQualityScore(SkillValidator.Evaluate.PairwiseJudgeResult)">
+            <summary>
+            Convert a PairwiseJudgeResult into a quality improvement score in [-1, 1].
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.FormatMetricWithDelta(System.Double,System.Double,System.Boolean)">
+            <summary>Formats a metric value with a percentage delta from baseline, e.g. "800 (-33%)".</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.FormatPctDelta(System.Double,System.Double,System.Boolean)">
+            <summary>Returns a parenthesized percentage delta string, e.g. " (-33%)".</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.SafeDirName(System.String)">
+            <summary>Sanitize a skill name into a safe single directory segment by slugifying.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.FormatQualityCell(System.Nullable{System.Double},System.Nullable{System.Double},System.Boolean,System.Boolean,System.Nullable{System.Double}@)">
+            <summary>
+            Formats the combined Quality column: "baseline → skill" with the better score bolded
+            and an emoji indicator.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.FormatActivationCell(SkillValidator.Evaluate.SkillActivationInfo,System.Boolean)">
+            <summary>Formats an activation info object into a markdown cell string.</summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.FormatSubagentCell(SkillValidator.Evaluate.SubagentActivationInfo)">
+            <summary>Formats a subagent activation info object into a markdown cell string.</summary>
+            <remarks>
+            Agent names may originate from plugin content; we sanitize them to avoid breaking
+            markdown table formatting or enabling injection via characters like '|' or newlines.
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.SanitizeMarkdownTableCell(System.String)">
+            <summary>
+            Sanitizes text for inclusion in a markdown table cell by escaping table delimiters
+            and replacing line breaks with spaces.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Reporter.BuildVerdictFootnote(SkillValidator.Evaluate.ScenarioComparison,System.Nullable{System.Double})">
+            <summary>
+            Returns a footnote string when the verdict (based on composite ImprovementScore)
+            disagrees with the quality delta shown in the table, or null if no explanation is needed.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Evaluate.SessionDatabase">
+            <summary>
+            Tracks eval sessions in a SQLite database for crash recovery and rejudging.
+            Thread-safe for concurrent scenario/run execution. A lock protects the shared
+            SqliteConnection (which is not thread-safe) while WAL mode and busy_timeout
+            handle write contention at the SQLite level.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.SessionDatabase.ComputeDirectorySha(System.String)">
+            <summary>
+            Computes a SHA-256 hash over all files in a directory, sorted by relative path.
+            Returns the first 12 hex characters for a short, collision-resistant identifier.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.SessionDatabase.ComputeFileSha(System.String)">
+            <summary>
+            Computes a SHA-256 hash over a single file.
+            Returns the first 12 hex characters. Used for agent files (*.agent.md).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.SessionDatabase.GetCompletedSessions">
+            <summary>
+            Returns all completed sessions as a flat list ordered by skill, scenario, run index, and role.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.SessionDatabase.GetSchemaInfo">
+            <summary>
+            Returns schema metadata (type, version) for DB detection by external tools.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Statistics.BootstrapConfidenceInterval(System.Collections.Generic.IReadOnlyList{System.Double},System.Double,System.Int32)">
+            <summary>
+            Compute a bootstrap percentile confidence interval.
+            Resamples <paramref name="data"/> with replacement <paramref name="iterations"/> times,
+            computes the mean of each resample, and returns the percentile-based CI.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Statistics.SeededRandom(System.Int32)">
+            <summary>
+            Deterministic pseudo-random for reproducible bootstrap.
+            Uses a simple splitmix-style hash.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Statistics.IsStatisticallySignificant(SkillValidator.Evaluate.ConfidenceInterval)">
+            <summary>
+            Check if the CI excludes zero, indicating statistical significance.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Statistics.CoefficientOfVariation(System.Collections.Generic.IReadOnlyList{System.Double})">
+            <summary>
+            Compute the coefficient of variation (CV) for a set of scores.
+            Returns null if fewer than 2 data points. A CV above the threshold
+            (e.g., 0.5) indicates high run-to-run variance.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Evaluate.Statistics.WilsonScoreInterval(System.Int32,System.Int32,System.Double)">
+            <summary>
+            Wilson score interval for a binomial proportion.
+            Useful for pass/fail rates with small samples.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.AgentDiscovery.DiscoverAgents(System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Discover agent files (.agent.md) from plugin directories reachable from the given paths.
+            Walks up from each path to find the plugin root (directory containing plugin.json),
+            then scans the agents/ subdirectory.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.AgentDiscovery.DiscoverAgentsInPlugin(System.String)">
+            <summary>
+            Discover agent files (.agent.md) within a plugin root directory.
+            Uses plugin.json to determine the agents paths; falls back to
+            the "agents" directory by convention when none are specified.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.AgentDiscovery.DiscoverAgentsInDirectory(System.String)">
+            <summary>
+            Discover agent files (.agent.md) in the given directory, or a single agent if a file path is provided.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Shared.Ansi">
+            <summary>
+            ANSI escape code constants for terminal output styling.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Shared.ConcurrencyLimiter">
+            <summary>
+            Concurrency limiter equivalent to p-limit in Node.js.
+            Wraps a SemaphoreSlim to limit concurrent async operations.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.ConcurrencyLimiter.#ctor(System.Int32)">
+            <summary>
+            Concurrency limiter equivalent to p-limit in Node.js.
+            Wraps a SemaphoreSlim to limit concurrent async operations.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Shared.FrontmatterParser">
+            <summary>
+            Shared frontmatter parsing for SKILL.md and .agent.md files.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.FrontmatterParser.FrontmatterRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^---\\r?\\n([\\s\\S]*?)\\r?\\n---\\r?\\n([\\s\\S]*)$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match the string "---".<br/>
+            ○ Match '\r' atomically, optionally.<br/>
+            ○ Match '\n'.<br/>
+            ○ 1st capture group.<br/>
+                ○ Match any character lazily any number of times.<br/>
+            ○ Match '\r' atomically, optionally.<br/>
+            ○ Match the string "\n---".<br/>
+            ○ Match '\r' atomically, optionally.<br/>
+            ○ Match '\n'.<br/>
+            ○ 2nd capture group.<br/>
+                ○ Match any character greedily any number of times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Shared.FrontmatterParser.SplitFrontmatter(System.String)">
+            <summary>
+            Splits markdown content into frontmatter YAML and body.
+            Returns null yaml when no frontmatter is present.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Shared.LlmJson">
+            <summary>
+            Shared utilities for parsing JSON from LLM responses.
+            LLMs often wrap JSON in markdown code blocks or produce invalid escape
+            sequences. These helpers handle both cases robustly.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.LlmJson.ExtractJson(System.String)">
+            <summary>
+            Extract a JSON string from LLM response text.
+            Tries markdown code block first, then falls back to brace-matching.
+            When brace-matching, validates candidates with JsonDocument.Parse and skips
+            non-JSON brace groups (e.g., C# code snippets).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.LlmJson.ParseLlmJson(System.String,System.String)">
+            <summary>
+            Parse a JSON string, tolerating invalid escape sequences that LLMs
+            sometimes produce (e.g., \' or \a).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.LlmJson.CodeBlockRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>```(?:json)?\\s*(\\{[\\s\\S]*?\\})\\s*```</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match the string "```".<br/>
+            ○ Optional (greedy).<br/>
+                ○ Match the string "json".<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ 1st capture group.<br/>
+                ○ Match '{'.<br/>
+                ○ Match any character lazily any number of times.<br/>
+                ○ Match '}'.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match the string "```".<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:SkillValidator.Shared.LlmJson.InvalidEscapeRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>\\\\(?!["\\\\\\/bfnrtu])</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match '\\'.<br/>
+            ○ Zero-width negative lookahead.<br/>
+                ○ Match a character in the set ["/\\bfnrtu].<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="T:SkillValidator.Shared.PluginDiscovery">
+            <summary>
+            Plugin discovery and parsing: finding plugin roots, parsing plugin.json, path safety.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.PluginDiscovery.FindPluginRoot(System.String,System.Int32)">
+            <summary>
+            Walk up from a path to find the plugin root (directory containing plugin.json).
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.PluginDiscovery.FindPluginContext(SkillValidator.Shared.SkillInfo)">
+            <summary>
+            For a given skill, find its plugin root directory (the directory containing plugin.json).
+            Returns the plugin root path and the parsed PluginInfo.
+            Returns null if no plugin.json is found or if it is malformed.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.PluginDiscovery.TryGetSafeSubdirectory(System.String,System.String,System.String@,System.String@)">
+            <summary>
+            Validates that a relative path stays within the root directory.
+            Rejects absolute paths and parent-directory traversal.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.PluginDiscovery.ParsePluginJson(System.String)">
+            <summary>
+            Parses a plugin.json file into a PluginInfo record.
+            Returns null if the file doesn't exist. Throws on malformed JSON so callers
+            can surface it as a blocking validation error.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Shared.RetryHelper">
+            <summary>
+            Shared retry-with-exponential-backoff helper used by both Judge and PairwiseJudge.
+            Caps total elapsed time so that repeated timeouts don't blow past the workflow budget.
+            </summary>
+        </member>
+        <member name="F:SkillValidator.Shared.RetryHelper.DefaultBaseDelayMs">
+            <summary>Default base delay between retries (doubles each attempt).</summary>
+        </member>
+        <member name="F:SkillValidator.Shared.RetryHelper.DefaultMaxRetries">
+            <summary>Default maximum number of retries after the initial attempt.</summary>
+        </member>
+        <member name="F:SkillValidator.Shared.RetryHelper.DefaultTotalTimeoutMs">
+            <summary>
+            Maximum total wall-clock time (across all attempts + backoff) before giving up.
+            This prevents a chain of timeout→retry→timeout from exceeding the job-level budget.
+            Default: 10 minutes.
+            </summary>
+        </member>
+        <member name="F:SkillValidator.Shared.RetryHelper.MaxSingleDelayMs">
+            <summary>Absolute upper bound on any single backoff delay (60 seconds).</summary>
+        </member>
+        <member name="F:SkillValidator.Shared.RetryHelper.JitterFactor">
+            <summary>
+            Maximum jitter factor applied to retry delays (25% of computed delay).
+            Jitter prevents thundering-herd when many concurrent operations retry simultaneously.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.RetryHelper.ExecuteWithRetry``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.String,System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Executes <paramref name="action"/> with retries and exponential backoff.
+            A linked <see cref="T:System.Threading.CancellationToken"/> that honours both <paramref name="cancellationToken"/>
+            and <paramref name="totalTimeoutMs"/> is passed into the action so that in-progress async
+            operations (e.g. SDK / HTTP calls) are cancelled promptly when the budget expires.
+            </summary>
+            <param name="action">The async operation to attempt. Receives a budget-linked token.</param>
+            <param name="label">Human-readable label for log messages (e.g. "Judge for \"scenario X\"").</param>
+            <param name="maxRetries">Maximum retries after the first attempt.</param>
+            <param name="baseDelayMs">Base delay in milliseconds (doubles each retry).</param>
+            <param name="totalTimeoutMs">
+            Hard cap on total elapsed time. When exceeded, the helper stops retrying even if
+            <paramref name="maxRetries"/> has not been exhausted.
+            </param>
+            <param name="cancellationToken">Optional token to cancel the retry loop.</param>
+        </member>
+        <member name="M:SkillValidator.Shared.RetryHelper.ExecuteWithRetryCore``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.String,System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken,System.Func{System.Int64},System.Func{System.Int32,System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Func{System.Double})">
+            <summary>
+            Internal overload with injectable <paramref name="clock"/>, <paramref name="delayFunc"/>,
+            and <paramref name="jitterFunc"/> seams so that tests can run without real wall-clock
+            timing or randomness.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.SkillDiscovery.DiscoverSkillsRecursive(System.String)">
+            <summary>
+            Recursively discover all skills under a directory tree by finding SKILL.md files.
+            </summary>
+        </member>
+        <member name="T:SkillValidator.Shared.Spinner">
+            <summary>
+            Simple interactive spinner for terminal output.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.Shared.Spinner.Log(System.String)">
+            <summary>Write a log line without clobbering the spinner.</summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.Boolean">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.NullableBoolean">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.Double">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.NullableDouble">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.AgentEvent">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.Assertion">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.AssertionOverfitAssessment">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.AssertionResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.AssertionType">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.CommandAssertionArgs">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.ConfidenceInterval">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.ConsolidateData">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.FailureKind">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.NullableFailureKind">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.JudgeResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.MetricBreakdown">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.NoiseScenarioResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.NoiseTestResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.OverfittingResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.OverfittingSeverity">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.PairwiseJudgeResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.PairwiseMagnitude">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.PairwiseRubricResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.PromptOverfitAssessment">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.ResultsOutput">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.RubricOverfitAssessment">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.RubricScore">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.RunMetrics">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.RunResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.ScenarioComparison">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.SkillActivationInfo">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.SkillVerdict">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.SubagentActivationInfo">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.MCPServerDef">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.DictionaryStringJsonNode">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.DictionaryStringInt32">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.DictionaryStringString">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListDouble">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListAssertionOverfitAssessment">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListNoiseScenarioResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListPairwiseRubricResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListPromptOverfitAssessment">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListRubricOverfitAssessment">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListRubricScore">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListScenarioComparison">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListSkillVerdict">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.IReadOnlyListString">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.ListAgentEvent">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.ListAssertionResult">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.ListSkillVerdict">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.JsonElement">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.JsonNode">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.Int32">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.NullableInt32">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.Int64">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.String">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.StringArray">
+            <summary>
+            Defines the source generated JSON serialization contract metadata for a given type.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.Default">
+            <summary>
+            The default <see cref="T:System.Text.Json.Serialization.JsonSerializerContext"/> associated with a default <see cref="T:System.Text.Json.JsonSerializerOptions"/> instance.
+            </summary>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorJsonContext.GeneratedSerializerOptions">
+            <summary>
+            The source-generated options associated with this context.
+            </summary>
+        </member>
+        <member name="M:SkillValidator.SkillValidatorJsonContext.#ctor">
+            <inheritdoc/>
+        </member>
+        <member name="M:SkillValidator.SkillValidatorJsonContext.#ctor(System.Text.Json.JsonSerializerOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SkillValidator.SkillValidatorJsonContext.GetTypeInfo(System.Type)">
+            <inheritdoc/>
+        </member>
+        <member name="P:SkillValidator.SkillValidatorYamlContext.UnderscoredDeserializer">
+            <summary>
+            Shared YAML deserializer using underscore naming convention.
+            Used by EvalSchema (eval configs) and SkillDiscovery (frontmatter).
+            </summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the InvokesScriptRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvokesScriptRegex_0.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the ToolReferenceRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ToolReferenceRegex_1.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.UrlRegex_2">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the UrlRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.UrlRegex_2.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UrlRegex_2.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.UrlRegex_2.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UrlRegex_2.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.UrlRegex_2.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UrlRegex_2.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UrlRegex_2.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UrlRegex_2.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.PipeToShellRegex_3">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the PipeToShellRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PipeToShellRegex_3.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the SriIntegrityRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SriIntegrityRegex_4.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the ExternalSrcRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ExternalSrcRegex_5.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the ScriptTagMultiLineRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptTagMultiLineRegex_6.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the ScriptSrcExtractRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.ScriptSrcExtractRegex_7.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the PlaceholderHostRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.PlaceholderHostRegex_8.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FenceOpenRegex_9">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the FenceOpenRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceOpenRegex_9.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FenceCloseRegex_10">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the FenceCloseRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FenceCloseRegex_10.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LocalhostRegex_11">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the LocalhostRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.LocalhostRegex_11.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LocalhostRegex_11.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LocalhostRegex_11.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LocalhostRegex_11.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LocalhostRegex_11.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LocalhostRegex_11.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LocalhostRegex_11.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LocalhostRegex_11.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LoopbackRegex_12">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the LoopbackRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.LoopbackRegex_12.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LoopbackRegex_12.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LoopbackRegex_12.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LoopbackRegex_12.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LoopbackRegex_12.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LoopbackRegex_12.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LoopbackRegex_12.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LoopbackRegex_12.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WildcardListenRegex_13">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the WildcardListenRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WildcardListenRegex_13.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SectionRegex_14">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the SectionRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.SectionRegex_14.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SectionRegex_14.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SectionRegex_14.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SectionRegex_14.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SectionRegex_14.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SectionRegex_14.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SectionRegex_14.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SectionRegex_14.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.CodeBlockRegex_15">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the CodeBlockRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.CodeBlockRegex_15.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_15.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.CodeBlockRegex_15.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_15.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.CodeBlockRegex_15.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_15.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_15.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NumberedStepRegex_16">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the NumberedStepRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NumberedStepRegex_16.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.BulletRegex_17">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the BulletRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.BulletRegex_17.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.BulletRegex_17.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.BulletRegex_17.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.BulletRegex_17.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.BulletRegex_17.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.BulletRegex_17.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.BulletRegex_17.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.BulletRegex_17.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WhenToUseRegex_18">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the WhenToUseRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenToUseRegex_18.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the WhenNotToUseRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.WhenNotToUseRegex_19.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NameFormatRegex_20">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the NameFormatRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.NameFormatRegex_20.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NameFormatRegex_20.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NameFormatRegex_20.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NameFormatRegex_20.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NameFormatRegex_20.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NameFormatRegex_20.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NameFormatRegex_20.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NameFormatRegex_20.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FileRefRegex_21">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the FileRefRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.FileRefRegex_21.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FileRefRegex_21.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FileRefRegex_21.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FileRefRegex_21.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FileRefRegex_21.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FileRefRegex_21.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FileRefRegex_21.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FileRefRegex_21.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.UseSkillPattern_22">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the UseSkillPattern method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.UseSkillPattern_22.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UseSkillPattern_22.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.UseSkillPattern_22.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UseSkillPattern_22.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.UseSkillPattern_22.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UseSkillPattern_22.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UseSkillPattern_22.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.UseSkillPattern_22.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FrontmatterRegex_23">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the FrontmatterRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.FrontmatterRegex_23.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.CodeBlockRegex_24">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the CodeBlockRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.CodeBlockRegex_24.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the InvalidEscapeRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InvalidEscapeRegex_25.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.Utilities">
+            <summary>Helper methods used by generated <see cref="T:System.Text.RegularExpressions.Regex"/>-derived implementations.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout">
+            <summary>Default timeout value set in <see cref="T:System.AppContext"/>, or <see cref="F:System.Text.RegularExpressions.Regex.InfiniteMatchTimeout"/> if none was set.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_hasTimeout">
+            <summary>Whether <see cref="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout"/> is non-infinite.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IndexOfAnyDigit(System.ReadOnlySpan{System.Char})">
+            <summary>Finds the next index of any character that matches a Unicode digit.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IsBoundaryWordChar(System.Char)">
+            <summary>Determines whether the specified index is a boundary word character.</summary>
+            <remarks>This is the same as \w plus U+200C ZERO WIDTH NON-JOINER and U+200D ZERO WIDTH JOINER.</remarks>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IsPostWordCharBoundary(System.ReadOnlySpan{System.Char},System.Int32)">
+            <summary>Determines whether the specified index is a boundary.</summary>
+            <remarks>This variant is only employed when the previous character has already been validated as a word character.</remarks>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IsPreWordCharBoundary(System.ReadOnlySpan{System.Char},System.Int32)">
+            <summary>Determines whether the specified index is a boundary.</summary>
+            <remarks>This variant is only employed when the subsequent character will separately be validated as a word character.</remarks>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IsWordChar(System.Char)">
+            <summary>Determines whether the character is part of the [\w] set.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPop(System.Int32[],System.Int32@,System.Int32@,System.Int32@)">
+            <summary>Pops 2 values from the backtracking stack.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32)">
+            <summary>Pushes 1 value onto the backtracking stack.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32,System.Int32)">
+            <summary>Pushes 2 values onto the backtracking stack.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.WordCategoriesMask">
+            <summary>Provides a mask of Unicode categories that combine to form [\w].</summary>
+        </member>
+        <member name="P:System.Text.RegularExpressions.Generated.Utilities.WordCharBitmap">
+            <summary>Gets a bitmap for whether each character 0 through 127 is in [\w]</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiExceptDigits">
+            <summary>Supports searching for characters in or not in "\0\u0001\u0002\u0003\u0004\u0005\u0006\a\b\t\n\v\f\r\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f !\"#$%&amp;'()*+,-./:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u007f".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiLettersLowerAndDigitsAndDash">
+            <summary>Supports searching for characters in or not in "-0123456789abcdefghijklmnopqrstuvwxyz".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_ascii_280000022800000A">
+            <summary>Supports searching for characters in or not in "CEYcey{".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfAnyStrings_OrdinalIgnoreCase_01ACA0B3ED8A7B4833294F1A705D58EC77C5E91748DAA0FA8B409E25106F9CA8">
+            <summary>Supports searching for the specified strings.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_15CF2F5ADE322C448E0FB9C376AE0891AF1B660E12B995E1A8ACDE956200A51F">
+            <summary>Supports searching for the string "#tool:".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_ACD1AF3308000737329946CAB3D500C3329228244FA0C355223CB35C8E9ACBE9">
+            <summary>Supports searching for the string "```".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_EE97A8B60588DBCF16D59EBCDA6EB06B63C097AA2408D660C71E534337E01B1A">
+            <summary>Supports searching for the string "](".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_http_OrdinalIgnoreCase">
+            <summary>Supports searching for the string "http".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_integrity_OrdinalIgnoreCase">
+            <summary>Supports searching for the string "integrity".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_invo_OrdinalIgnoreCase">
+            <summary>Supports searching for the string "invo".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_src_OrdinalIgnoreCase">
+            <summary>Supports searching for the string "src".</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_indexOfString_use_OrdinalIgnoreCase">
+            <summary>Supports searching for the string "use".</summary>
+        </member>
+    </members>
+</doc>
