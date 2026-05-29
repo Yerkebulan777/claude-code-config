@@ -1,4 +1,9 @@
 {
+  "skillListingBudgetFraction": 0.03,
+  "env": {
+    "MAX_THINKING_TOKENS": "10000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50"
+  },
   "permissions": {
     "allow": [
       "Bash(find:*)",
@@ -75,6 +80,15 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/y.zhumabayev/.local/bin/rtk.exe hook claude"
+          }
+        ]
+      },
+      {
         "matcher": "Grep|Glob|Bash",
         "hooks": [
           {
@@ -103,7 +117,8 @@
     "claude-code-setup@claude-plugins-official": true,
     "dotnet@dotnet-agent-skills": true,
     "dotnet-diag@dotnet-agent-skills": true,
-    "dotnet-nuget@dotnet-agent-skills": true
+    "dotnet-nuget@dotnet-agent-skills": true,
+    "atomic-agents@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
@@ -131,7 +146,6 @@
       }
     }
   },
-  "skillListingBudgetFraction": 0.03,
   "language": "russian",
   "autoUpdatesChannel": "stable",
   "theme": "dark-daltonized"
