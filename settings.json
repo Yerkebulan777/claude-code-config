@@ -67,17 +67,6 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:/Users/y.zhumabayev/.claude/hooks/on-stop.mjs"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -143,6 +132,12 @@
       "source": {
         "source": "github",
         "repo": "dotnet/skills"
+      }
+    },
+    "context-mode": {
+      "source": {
+        "source": "github",
+        "repo": "mksglu/claude-context-mode"
       }
     }
   },

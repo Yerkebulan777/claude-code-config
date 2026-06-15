@@ -5,7 +5,7 @@
       "repo": "anthropics/claude-plugins-official"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\claude-plugins-official",
-    "lastUpdated": "2026-05-28T12:50:50.464Z"
+    "lastUpdated": "2026-06-15T08:08:50.163Z"
   },
   "caveman": {
     "source": {
@@ -13,7 +13,7 @@
       "repo": "JuliusBrussee/caveman"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\caveman",
-    "lastUpdated": "2026-05-20T11:42:30.917Z"
+    "lastUpdated": "2026-06-12T03:46:13.193Z"
   },
   "openai-codex": {
     "source": {
@@ -21,7 +21,7 @@
       "repo": "openai/codex-plugin-cc"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\openai-codex",
-    "lastUpdated": "2026-05-20T11:42:33.680Z"
+    "lastUpdated": "2026-06-12T03:46:15.569Z"
   },
   "anthropic-agent-skills": {
     "source": {
@@ -29,7 +29,7 @@
       "repo": "anthropics/skills"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\anthropic-agent-skills",
-    "lastUpdated": "2026-04-21T12:04:28.415Z"
+    "lastUpdated": "2026-06-12T04:20:36.382Z"
   },
   "dotnet-agent-skills": {
     "source": {
@@ -37,6 +37,14 @@
       "repo": "dotnet/skills"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\dotnet-agent-skills",
-    "lastUpdated": "2026-05-06T07:23:56.786Z"
+    "lastUpdated": "2026-06-12T03:46:24.979Z"
+  },
+  "context-mode": {
+    "source": {
+      "source": "github",
+      "repo": "mksglu/claude-context-mode"
+    },
+    "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\context-mode",
+    "lastUpdated": "2026-06-12T04:54:08.419Z"
   }
 }
