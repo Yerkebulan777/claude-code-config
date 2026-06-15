@@ -5,7 +5,7 @@
       "repo": "anthropics/claude-plugins-official"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\claude-plugins-official",
-    "lastUpdated": "2026-06-15T08:08:50.163Z"
+    "lastUpdated": "2026-06-15T08:35:08.062Z"
   },
   "caveman": {
     "source": {
@@ -29,7 +29,7 @@
       "repo": "anthropics/skills"
     },
     "installLocation": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\marketplaces\\anthropic-agent-skills",
-    "lastUpdated": "2026-06-12T04:20:36.382Z"
+    "lastUpdated": "2026-06-15T08:35:07.854Z"
   },
   "dotnet-agent-skills": {
     "source": {
