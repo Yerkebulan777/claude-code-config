@@ -13,7 +13,7 @@ import { homedir } from "node:os";
 const FLAG_PATH = join(homedir(), ".claude", "hooks", ".cs-modified-flag");
 
 try {
-  const raw = readFileSync("/dev/stdin", "utf8");
+  const raw = readFileSync(0, "utf8");
   const input = JSON.parse(raw);
 
   const filePath = input?.tool_input?.file_path ?? "";

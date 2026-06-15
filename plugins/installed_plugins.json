@@ -14,11 +14,11 @@
     "context7@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\context7\\9bfaf6e4132f",
-        "version": "9bfaf6e4132f",
+        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\context7\\d54d7a066cb8",
+        "version": "d54d7a066cb8",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-06-15T08:35:08.233Z",
-        "gitCommitSha": "9bfaf6e4132fab3ae46a57f8e73bf6c1be5df013"
+        "lastUpdated": "2026-06-15T08:52:57.495Z",
+        "gitCommitSha": "d54d7a066cb8311280e311959b49bddc19724e48"
       }
     ],
     "code-simplifier@claude-plugins-official": [
@@ -35,21 +35,21 @@
       {
         "scope": "project",
         "projectPath": "C:\\Users\\y.zhumabayev",
-        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\agent-sdk-dev\\9bfaf6e4132f",
-        "version": "9bfaf6e4132f",
+        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\agent-sdk-dev\\d54d7a066cb8",
+        "version": "d54d7a066cb8",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-06-15T08:35:08.258Z",
-        "gitCommitSha": "9bfaf6e4132fab3ae46a57f8e73bf6c1be5df013"
+        "lastUpdated": "2026-06-15T08:52:57.536Z",
+        "gitCommitSha": "d54d7a066cb8311280e311959b49bddc19724e48"
       }
     ],
     "code-review@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\code-review\\9bfaf6e4132f",
-        "version": "9bfaf6e4132f",
+        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\code-review\\d54d7a066cb8",
+        "version": "d54d7a066cb8",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-06-15T08:35:08.218Z",
-        "gitCommitSha": "9bfaf6e4132fab3ae46a57f8e73bf6c1be5df013"
+        "lastUpdated": "2026-06-15T08:52:57.509Z",
+        "gitCommitSha": "d54d7a066cb8311280e311959b49bddc19724e48"
       }
     ],
     "csharp-lsp@claude-plugins-official": [
@@ -65,11 +65,11 @@
     "github@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\github\\9bfaf6e4132f",
-        "version": "9bfaf6e4132f",
+        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\github\\d54d7a066cb8",
+        "version": "d54d7a066cb8",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-06-15T08:35:08.225Z",
-        "gitCommitSha": "9bfaf6e4132fab3ae46a57f8e73bf6c1be5df013"
+        "lastUpdated": "2026-06-15T08:52:57.502Z",
+        "gitCommitSha": "d54d7a066cb8311280e311959b49bddc19724e48"
       }
     ],
     "claude-md-management@claude-plugins-official": [
@@ -105,11 +105,11 @@
     "hookify@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\hookify\\9bfaf6e4132f",
-        "version": "9bfaf6e4132f",
+        "installPath": "C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\claude-plugins-official\\hookify\\d54d7a066cb8",
+        "version": "d54d7a066cb8",
         "installedAt": "2026-04-21T12:05:12.418Z",
-        "lastUpdated": "2026-06-15T08:35:08.210Z",
-        "gitCommitSha": "9bfaf6e4132fab3ae46a57f8e73bf6c1be5df013"
+        "lastUpdated": "2026-06-15T08:52:57.487Z",
+        "gitCommitSha": "d54d7a066cb8311280e311959b49bddc19724e48"
       }
     ],
     "claude-code-setup@claude-plugins-official": [

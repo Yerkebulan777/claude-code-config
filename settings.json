@@ -67,16 +67,17 @@
         ]
       }
     ],
-    "PreToolUse": [
+    "Stop": [
       {
-        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "C:/Users/y.zhumabayev/.local/bin/rtk.exe hook claude"
+            "command": "node C:/Users/y.zhumabayev/.claude/hooks/on-stop.mjs"
           }
         ]
-      },
+      }
+    ],
+    "PreToolUse": [
       {
         "matcher": "Grep|Glob|Bash",
         "hooks": [
@@ -140,6 +141,10 @@
         "repo": "mksglu/claude-context-mode"
       }
     }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\y.zhumabayev\\.claude\\plugins\\cache\\caveman\\caveman\\655b7d9c5431\\src\\hooks\\caveman-statusline.ps1\""
   },
   "language": "russian",
   "autoUpdatesChannel": "stable",
